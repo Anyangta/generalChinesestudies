@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>15x15 Word Puzzle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    .puzzle-container {
+      display: grid;
+      grid-template-columns: repeat(15, 40px);
+      grid-template-rows: repeat(15, 40px);
+      gap: 0;
+      background-color: #333;
+    }
+
+    .puzzle-cell {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      background-color: white;
+      border: 1px solid #000;
+      box-sizing: border-box;
+    }
+
+    .puzzle-cell input {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 18px;
+      border: none;
+      outline: none;
+      background: transparent;
+      text-transform: uppercase;
+    }
+
+    .puzzle-cell.blocked {
+      background-color: #555; /* Dark gray for blocked cells */
+    }
+
+    .puzzle-cell.blocked input {
+      display: none; /* Hide input for blocked cells */
+    }
+
+    .cell-number {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      font-size: 12px;
+      color: black;
+    }
+
+    .correct {
+      background-color: #c8e6c9; /* Green for correct answers */
+    }
+
+    .incorrect {
+      background-color: #ffcdd2; /* Red for incorrect answers */
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div style="margin-top: 300px; margin-bottom: 50px; height: 1000px; width: 1800px;">
+    <div style="float: left; height: 500px; width: 900px; background-color: #c8e6c9;">
+      <h1 style="margin-left: 10px;">가로</h1>
+      <p style="margin-left: 10px;">① : 말하는 것이 사리에 맞음.</p>
+      <p style="margin-left: 10px;">② : 잊지 못할 은혜.</p>
+      <p style="margin-left: 10px;">③ : 잘못을 하고도 고치지 않는다.</p>
+      <p style="margin-left: 10px;">④ : 스스로 손발을 움직여 인을 실천한다.</p>
+      <p style="margin-left: 10px;">⑤ : 권력이나 세력을 제멋대로 부리며 함부로 날뛰는 행동이 만연하다.</p>
+      <p style="margin-left: 10px;">⑥ : 글을 널리 배우고 예로써 요약하라.</p>
+      <p style="margin-left: 10px;">⑦ : 어떤 책이든 한번 보기만 하면 곧 왼다.</p>
+      <p style="margin-left: 10px;">⑧ : 고양이와 쥐가 함께 있다.</p>
+      <p style="margin-left: 10px;">⑨ : 꿈인지 생시인지 어렴풋한 상태.</p>
+      <p style="margin-left: 10px;">⑩ : 이익을 보면 의리를 잊음.</p>
+      
+    </div>
+
+    <div style="float: left; height: 500px; width: 900px; background-color: #e0e4d5;">
+      <h1 style="margin-left: 10px;">세로</h1>
+      <p style="margin-left: 10px;">㉠ : 남의 비위에 맞도록 꾸민 달콤한 말과 이로운 조건을 내세워 꾀는 말</p>
+      <p style="margin-left: 10px;">㉡ : 정도를 지나침은 미치지 못한 것과 같음</p>
+      <p style="margin-left: 10px;">㉢ : 은혜를 잊고 배신하는 행위</p>
+      <p style="margin-left: 10px;">㉣ : 남의 방에 들어가 무기를 빼앗아서 공격한다</p>
+      <p style="margin-left: 10px;">㉤ : 과거의 잘못을 고쳐서 선한 사람이 된다</p>
+      <p style="margin-left: 10px;">㉥ : 화냄을 옮기지 않고 같은 잘못을 두 번 하지 않는다</p>
+      <p style="margin-left: 10px;">㉦ : 기회를 노리고 형세를 살피는 것을 비유하는 말</p>
+      <p style="margin-left: 10px;">㉧ : 나는 옳고 남은 그르다</p>
+      <p style="margin-left: 10px;">㉨ : 같은 어려움이나 고통을 겪는 사람끼리 서로 가엾게 여기고 동정한다</p>
+      <p style="margin-left: 10px;">㉩ : 꿈에도 그리워 잊기가 어려움</p>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="puzzle-container">
+    <script>
+      const container = document.querySelector('.puzzle-container');
+
+      // Define blocked cells (non-playable cells)
+      const blockedCells = [
+        [0, 1], [0, 2], [0, 3], [0, 4], [0, 6], [0, 7], [0, 8], [0, 9], [0, 11], [0, 12], [0, 13], [0, 14], 
+        [1, 4], [1, 6], [1, 7], [1, 9], [1, 11], [1, 12], [1, 13], [1, 14], 
+        [2, 1], [2, 2], [2, 3], [2, 4], [2, 9], [2, 11], [2, 12], [2, 13], [2, 14],
+        [3, 1], [3, 2], [3, 3], [3, 4], [3, 6], [3, 7], [3, 9], [3, 14],
+        [4, 0], [4, 5], [4, 6], [4, 7], [4, 9], [4, 10], [4, 11], [4, 12], [4, 14], 
+        [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10], [5, 11], [5, 12], [5, 14], 
+        [6, 1], [6, 2], [6, 3], [6, 4], [6, 9], [6, 10], [6, 12], [6, 14], 
+        [7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 9], [7, 10], [7, 12], [7, 13], [7, 14],
+        [8, 1], [8, 6], [8, 7], [8, 9], [8, 10], [8, 12], [8, 13], [8, 14], 
+        [9, 1], [9, 2], [9, 3], [9, 4], [9, 5], [9, 6], [9, 7], [9, 9], [9, 10], 
+        [10, 1], [10, 2], [10, 3], [10, 8], [10, 9], [10, 10], [10, 11], [10, 13], [10, 14], 
+        [11, 4], [11, 5], [11, 7], [11, 8], [11, 9], [11, 10], [11, 11], [11, 13], [11, 14],  
+        [12, 0], [12, 1], [12, 2], [12, 3], [12, 4], [12, 5],  [12, 7], [12, 8], [12, 9], [12, 14],
+        [13, 0], [13, 1], [13, 2], [13, 3], [13, 4], [13, 5], [13, 7], [13, 8], [13, 9], [13, 10], [13, 11], [13, 12], [13, 13], [13, 14], 
+        [14, 0], [14, 1], [14, 2], [14, 3], [14, 4], [14, 5], [14, 6], [14, 7], [14, 8], [14, 9], [14, 10], [14, 11], [14, 12], [14, 13], [14, 14], 
+        
+      ];
+
+      // Define numbered cells (starting positions of words)
+      const numberedCells = [
+        { row: 0, col: 0, number: "㉠" },
+        { row: 0, col: 5, number: "㉡" },
+        { row: 1, col: 8, number: "㉢" },
+        { row: 0, col: 10, number: "㉣" },
+        { row: 3, col: 13, number: "㉤" },
+        { row: 6, col: 0, number: "㉥" },
+        { row: 6, col: 8, number: "㉦" },
+        { row: 6, col: 11, number: "㉧" },
+        { row: 10, col: 6, number: "㉨" },
+        { row: 9, col: 12, number: "㉩" },
+
+        { row: 1, col: 0, number: "①" },
+        { row: 2, col: 5, number: "②" },
+        { row: 3, col: 10, number: "③" },
+        { row: 4, col: 1, number: "④" },
+        { row: 6, col: 5, number: "⑤" },
+        { row: 8, col: 2, number: "⑥" },
+        { row: 11, col: 0, number: "⑦" },
+        { row: 10, col: 4, number: "⑧" },
+        { row: 9, col: 11, number: "⑨" },
+        { row: 12, col: 10, number: "⑩" },
+      ];
+
+      // Define answers (row, col, correct character)
+      const answers = [
+        { row: 0, col: 0, answer: "감" },
+        { row: 1, col: 0, answer: "언" },
+        { row: 2, col: 0, answer: "이" },
+        { row: 3, col: 0, answer: "설" },
+
+        { row: 1, col: 1, answer: "즉" },
+        { row: 1, col: 2, answer: "시" },
+        { row: 1, col: 3, answer: "야" },
+
+        { row: 0, col: 5, answer: "과" },
+        { row: 1, col: 5, answer: "유" },
+        { row: 2, col: 5, answer: "불" },
+        { row: 3, col: 5, answer: "급" },
+
+        { row: 2, col: 6, answer: "망" },
+        { row: 2, col: 7, answer: "지" },
+        { row: 2, col: 8, answer: "은" },
+
+        { row: 1, col: 8, answer: "배" },
+        { row: 3, col: 8, answer: "망" },
+        { row: 4, col: 8, answer: "덕" },
+
+        { row: 0, col: 10, answer: "입" },
+        { row: 1, col: 10, answer: "실" },
+        { row: 2, col: 10, answer: "조" },
+        { row: 3, col: 10, answer: "과" },
+
+        { row: 3, col: 11, answer: "이" },
+        { row: 3, col: 12, answer: "불" },
+        { row: 3, col: 13, answer: "개" },
+
+        { row: 4, col: 13, answer: "과" },
+        { row: 5, col: 13, answer: "천" },
+        { row: 6, col: 13, answer: "선" },
+
+        { row: 4, col: 1, answer: "능" },
+        { row: 4, col: 2, answer: "근" },
+        { row: 4, col: 3, answer: "취" },
+        { row: 4, col: 4, answer: "비" },
+
+        { row: 6, col: 0, answer: "불" },
+        { row: 7, col: 0, answer: "천" },
+        { row: 8, col: 0, answer: "노" },
+        { row: 9, col: 0, answer: "불" },
+        { row: 10, col: 0, answer: "이" },
+        { row: 11, col: 0, answer: "과" },
+
+        { row: 11, col: 1, answer: "목" },
+        { row: 11, col: 2, answer: "성" },
+        { row: 11, col: 3, answer: "송" },
+
+        { row: 8, col: 2, answer: "박" },
+        { row: 8, col: 3, answer: "문" },
+        { row: 8, col: 4, answer: "약" },
+        { row: 8, col: 5, answer: "례" },
+
+        { row: 6, col: 5, answer: "도" },
+        { row: 6, col: 6, answer: "량" },
+        { row: 6, col: 7, answer: "발" },
+        { row: 6, col: 8, answer: "호" },
+
+        { row: 7, col: 8, answer: "시" },
+        { row: 8, col: 8, answer: "탐" },
+        { row: 9, col: 8, answer: "탐" },
+
+        { row: 10, col: 4, answer: "묘" },
+        { row: 10, col: 5, answer: "서" },
+        { row: 10, col: 6, answer: "동" },
+        { row: 10, col: 7, answer: "처" },
+
+        { row: 11, col: 6, answer: "병" },
+        { row: 12, col: 6, answer: "상" },
+        { row: 13, col: 6, answer: "련" },
+
+        { row: 6, col: 11, answer: "아" },
+        { row: 7, col: 11, answer: "시" },
+        { row: 8, col: 11, answer: "타" },
+        { row: 9, col: 11, answer: "비" },
+
+        { row: 9, col: 12, answer: "몽" },
+        { row: 9, col: 13, answer: "사" },
+        { row: 9, col: 14, answer: "몽" },
+
+        { row: 10, col: 12, answer: "매" },
+        { row: 11, col: 12, answer: "난" },
+        { row: 12, col: 12, answer: "망" },
+        
+        { row: 12, col: 10, answer: "견" },
+        { row: 12, col: 11, answer: "리" },
+        { row: 12, col: 13, answer: "의" },
+
+        // Add more answers as needed
+      ];
+
+      // Create 15x15 grid
+      for (let row = 0; row < 15; row++) {
+        for (let col = 0; col < 15; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('puzzle-cell');
+
+          // Mark blocked cells
+          if (blockedCells.some(([r, c]) => r === row && c === col)) {
+            cell.classList.add('blocked');
+          } else {
+            // Add input field for non-blocked cells
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.maxLength = 1; // Allow only one character per cell
+            input.dataset.row = row; // Store row position
+            input.dataset.col = col; // Store col position
+
+            cell.appendChild(input);
+          }
+
+          // Add numbers to specific cells
+          const numberedCell = numberedCells.find(nc => nc.row === row && nc.col === col);
+          if (numberedCell) {
+            const numberDiv = document.createElement('div');
+            numberDiv.textContent = numberedCell.number;
+            numberDiv.classList.add('cell-number');
+            cell.appendChild(numberDiv);
+          }
+
+          container.appendChild(cell);
+        }
+      }
+
+      // Check answers
+      function checkAnswers() {
+        const inputs = document.querySelectorAll('.puzzle-cell input');
+        inputs.forEach((input) => {
+          const row = parseInt(input.dataset.row, 10); // 현재 칸의 row
+          const col = parseInt(input.dataset.col, 10); // 현재 칸의 col
+          const answerObj = answers.find(a => a.row === row && a.col === col); // 정답 객체 찾기
+
+          if (answerObj) {
+            const userAnswer = input.value.trim(); // 입력값 (공백 제거)
+            const correctAnswer = answerObj.answer.trim(); // 정답값 (공백 제거)
+
+            console.log(`Row: ${row}, Col: ${col}, User: "${userAnswer}", Correct: "${correctAnswer}"`); // 디버깅용 로그
+
+            if (userAnswer === correctAnswer) {
+              input.parentElement.classList.add('correct'); // 정답일 때 추가
+              input.parentElement.classList.remove('incorrect'); // 오답일 때 제거
+            } else {
+              input.parentElement.classList.add('incorrect'); // 오답일 때 추가
+              input.parentElement.classList.remove('correct'); // 정답일 때 제거
+            }
+          }
+        });
+      }
+    </script>
+  </div>
+  <button onclick="checkAnswers()">Check Answers</button>
+
+
+  
+
+
+
+
+</body>
+</html>
